@@ -3,6 +3,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
 import datetime
+import math
+
 
 df = pd.read_csv("cpi.csv")
 
@@ -89,6 +91,15 @@ def printing(list_dict):
     print(list_dict[2])
     print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 
+def imputer(d:dict):
+    prev = d[list(d.keys())[0]]
+    for index, key in d.keys():
+        if d[key] == math.nan:
+            if index == 0:
+                d[key] = sum(list(d.values()))/len(d.values())
+            else:
+                d[key] = prev
+                prev = d[key]
 
 # print(spelling_mistake)
 print(df.iloc[44]['Month'])
@@ -96,3 +107,39 @@ print(df.iloc[44]['Month'])
 printing(Housing)
 print("88************************************************************************")
 printing(transport_n_communication)
+
+start_year = 2013
+end_year = 2020
+
+all_dates = []
+
+for year in range(start_year, end_year + 1):
+    for month in range(1, 13):
+        if month==12:
+            days_in_month = (datetime.datetime(year+1, 1, 1) - datetime.datetime(year, month, 1)).days
+        else:    
+            days_in_month = (datetime.datetime(year, month % 12 + 1, 1) - datetime.datetime(year, month % 12, 1)).days
+
+        for day in range(1, days_in_month + 1):
+            all_dates.append(datetime.date(year, month, day))
+
+# print(all_dates)
+
+lending_rates_data = {}
+
+for i in all_dates:
+    if i in lending_rates.keys():
+        lending_rates_data[i] = lending_rates[i]
+    else:
+        lending_rates_data[i] = 0
+
+# print(repo_rates_data)
+
+val = 17.0
+for i in range(len(all_dates)):
+    if lending_rates_data[all_dates[i]] == 0:
+        lending_rates_data[all_dates[i]] = val
+    else:
+        val = lending_rates_data[all_dates[i]]
+
+print(lending_rates_data)
