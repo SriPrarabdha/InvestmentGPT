@@ -44,6 +44,13 @@ RUBBER=(RUBBER/73)*100
 IRON=(IRON/12)*100
 ALUM=(ALUM/1679)*100
 
+METAL.to_json("data/global_metal_prices.json")
+COAL.to_json("data/global_coal_prices.json")
+COPPER.to_json("data/global_copper_prices.json")
+RUBBER.to_json("data/global_rubber_prices.json")
+IRON.to_json("data/global_iron_prices.json")
+ALUM.to_json("data/global_alum_prices.json")
+
 
 fig = plt.figure(figsize=(12, 6))
 ax = fig.add_subplot()

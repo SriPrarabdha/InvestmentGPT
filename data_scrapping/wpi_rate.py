@@ -300,3 +300,94 @@ print("------------------------------------------------")
 print(final_wpi_data)
 # final_wpi_data.update(wpi_data_raw_before2005_)
 # final_wpi_data.update(wpi_data_raw)
+
+import ast
+import datetime
+import re
+import math
+import plotly.graph_objects as go
+
+with open("1.txt" , "r") as f:
+    text = f.read()
+
+# print(text)
+
+pattern = r'datetime\.date\(\d{4}, \d{1,2}, \d{1,2}\): [0-9.-]+'
+matches = re.findall(pattern, text)
+
+# Create a dictionary with keys as datetime.date objects and values as floats
+result_dict = {}
+for match in matches:
+    key, value = match.split(": ")
+    # Extract year, month, and day using regex
+    year, month, day = re.findall(r'\d{4}|\d{1,2}', key)
+    key_date = datetime.date(int(year), int(month), int(day))
+    result_dict[key_date] = float(value)
+
+print(result_dict)
+
+start_year = 2000
+end_year = 2023
+
+all_dates = []
+
+for year in range(start_year, end_year + 1):
+    for month in range(1, 13):
+        if month==12:
+            days_in_month = (datetime.datetime(year+1, 1, 1) - datetime.datetime(year, month, 1)).days
+        else:    
+            days_in_month = (datetime.datetime(year, month % 12 + 1, 1) - datetime.datetime(year, month % 12, 1)).days
+
+        for day in range(1, days_in_month + 1):
+            all_dates.append(datetime.date(year, month, day))
+
+# print(all_dates)
+
+final_wpi_data = {}
+
+for i in all_dates:
+    if i in result_dict.keys():
+        final_wpi_data[i] = result_dict[i]
+    else:
+        final_wpi_data[i] = math.inf
+
+print(final_wpi_data)
+
+val = 0
+for i in range(len(all_dates)):
+    if final_wpi_data[all_dates[i]] == math.inf:
+        final_wpi_data[all_dates[i]] = val
+    else:
+        val = final_wpi_data[all_dates[i]]
+
+print(final_wpi_data)
+
+import plotly.graph_objects as go
+
+dates = list(final_wpi_data.keys())
+values = list(final_wpi_data.values())
+
+negative_values = set()
+for i, v in enumerate(values):
+    if v < 0:
+        negative_values.add(i)
+        
+fig = go.Figure()
+
+for i in range(len(values)):
+    fig.add_trace(go.Scatter(
+        x = [dates[i]], 
+        y = [values[i]],
+        mode = 'lines+markers',
+        name = str(i),
+        line_color = 'rgb(255, 255, 0)' if i in negative_values else 'rgb(0, 0, 255)' 
+    ))
+
+fig.update_yaxes(
+   showline=True,
+   linecolor='rgb(0,0,0)',
+   zerolinecolor='rgb(0,0,0)',
+   zerolinewidth=2,
+)
+
+fig.show()

@@ -36,6 +36,11 @@ WHEAT=(WHEAT/93)*100
 BARLEY=(BARLEY/73)*100
 CORN=(CORN/92)*100
 
+FOOD.to_json("data/global_food_prices.json")
+WHEAT.to_json("data/global_wheat_prices.json")
+BARLEY.to_json("data/global_barley_prices.json")
+CORN.to_json("data/global_corn_prices.json")
+
 fig = plt.figure(figsize=(12, 6))
 ax = fig.add_subplot()
 

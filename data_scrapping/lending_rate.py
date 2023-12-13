@@ -86,6 +86,8 @@ lending_rates_raw = {"15.06.2023" : "14.85",
 "04.07.1991" : "18.50",
 "01.04.1991" : "17.00"}
 
+import json
+
 lending_rates = {}
 for i in lending_rates_raw.keys():
     d = i.split(".")
@@ -129,6 +131,20 @@ for i in range(len(all_dates)):
         val = lending_rates_data[all_dates[i]]
 
 print(lending_rates_data)
+
+converted_dict = {int(datetime.datetime.combine(key, datetime.datetime.min.time()).timestamp()): value for key, value in lending_rates_data.items()}
+
+# Write JSON data to a file
+with open('data/rbi_lending_rate.json', 'w') as file:
+    json.dump(converted_dict, file)
+
+# with open('data.json', 'r') as file:
+#     loaded_data = json.load(file)
+
+# # Convert Unix timestamps back to datetime.date objects
+# converted_dates = {datetime.utcfromtimestamp(int(timestamp)).date(): value for timestamp, value in loaded_data.items()}
+
+# print(converted_dates)
 
 
 dates = list(lending_rates_data.keys())

@@ -145,6 +145,13 @@ for i in range(len(all_dates)):
 
 print(repo_rates_data)
 
+import json
+
+converted_dict = {int(datetime.datetime.combine(key, datetime.datetime.min.time()).timestamp()): value for key, value in repo_rates_data.items()}
+
+# Write JSON data to a file
+with open('data/rbi_repo_rate.json', 'w') as file:
+    json.dump(converted_dict, file)
 
 dates = list(repo_rates_data.keys())
 values = list(repo_rates_data.values())

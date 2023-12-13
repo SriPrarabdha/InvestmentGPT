@@ -18,17 +18,6 @@ print("fred key ==== ",fred_key)
 
 fred = Fred(api_key=fred_key)
 
-FEDFUNDS=fred.get_series(series_id='FEDFUNDS')
-
-#Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity, Quoted on an Investment Basis
-T2Y=fred.get_series(series_id='DGS2')
-
-# Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis
-T10Y=fred.get_series(series_id='DGS10')
-
-#10-Year Treasury Constant Maturity Minus 2-Year Yield. This is a measure of the yield curve.
-T10Y2Y=fred.get_series(series_id='T10Y2Y')
-
 # Immediate Rates: Less than 24 Hours: Call Money/Interbank Rate for the United States 
 US_INT=fred.get_series(series_id='IRSTCI01USM156N')
 
@@ -52,6 +41,13 @@ POL_INT=fred.get_series(series_id='IRSTCB01PLM156N')
 
 #Immediate Rates: Less than 24 Hours: Central Bank Rates for South Africa
 SA_INT=fred.get_series(series_id='IRSTCB01ZAM156N')
+
+US_INT.to_json("data/us_interest_rates.json")
+UK_INT.to_json("data/uk_interest_rates.json")
+JAP_INT.to_json("data/japan_interest_rates.json")
+BRA_INT.to_json("data/brazil_interest_rates.json")
+POL_INT.to_json("data/polish_interest_rates.json")
+SA_INT.to_json("data/southAfrica_interest_rates.json")
 
 fig = plt.figure(figsize=(12, 6))
 ax = fig.add_subplot()

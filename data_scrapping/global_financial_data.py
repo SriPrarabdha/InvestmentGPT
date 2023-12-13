@@ -43,11 +43,17 @@ ax.set_xlabel(xlabel='Year', size=12)
 ax.set_ylabel(ylabel='U.S. Dollars per Million Metric British Thermal Unit ', size=12)
 
 fig.show()
-# fig.savefig('global_natural_gas.png')
+fig.savefig('global_natural_gas.png')
 
 GP_OIL=fred.get_series(series_id='POILWTIUSDM')
 
 COM_IND=fred.get_series(series_id='PALLFNFINDEXQ')
+
+GP_OIL.to_json("data/global_oil_prices.json")
+COM_IND.to_json("data/global_commodity_prices.json")
+GP_OIL.to_json("data/eu_natural_gas_prices.json")
+GP_OIL.to_json("data/asia_natural_gas_prices.json")
+GP_OIL.to_json("data/us_natural_gas_prices.json")
 
 fig = plt.figure(figsize=(12, 6))
 ax = fig.add_subplot()
