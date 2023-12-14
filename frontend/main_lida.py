@@ -17,6 +17,11 @@ def base64_to_image(base64_string):
     # Use BytesIO to convert the byte data to image
     return Image.open(BytesIO(byte_data))
 
+if 'clicked' not in st.session_state:
+    st.session_state.clicked = {1:False}
+
+def clicked(button):
+    st.session_state.clicked[button] = True
 
 lida = Manager(text_gen = llm("openai"))
 textgen_config = TextGenerationConfig(n=1, temperature=0.5, model="gpt-3.5-turbo-0301", use_cache=True)
@@ -66,4 +71,9 @@ elif menu == "Question based Graph":
                 image_base64 = charts[0].raster
                 img = base64_to_image(image_base64)
                 st.image(img)
+
+                st.button("Give Forecast", on_click=clicked, args=[1])
+
+                if st.session_state.clicked[1]:
+                    st.header("Start with uploading a file or just start Questions")
             

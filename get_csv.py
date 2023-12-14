@@ -1,8 +1,10 @@
 import json
 import csv
-from datetime import datetime
+import datetime
 import os
 from typing import Dict
+import math
+
 
 def handle_null(value):
     if value is None or value == "null":
@@ -41,7 +43,16 @@ for file in files:
     print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     print(file)
     for key, values in raw_data.items():
-        data[int(key)] = values
+        print(int(key), values)
+        updated_key = int(key)
+        if updated_key<0:
+            continue
+        if len(str(abs(updated_key))) > 10:
+            extra_zeros = len(str(abs(updated_key))) - 10
+            updated_key /= (10**extra_zeros)
+
+        print(int(updated_key), values)
+        data[datetime.datetime.fromtimestamp(int(updated_key))] = values
 
     print(data)
     # Handle 'None' values if needed
