@@ -6,9 +6,51 @@ import openai
 from PIL import Image
 from io import BytesIO
 import base64
+import pandas as pd
+import json
+from statsmodels.tsa.arima.model import ARIMA
+import matplotlib.pyplot as plt
 
 load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
+
+buffer = BytesIO()
+
+@st.cache
+def forecast():
+    model = ARIMA(df['Value'], order=(1, 2, 3))
+    results = model.fit()
+
+    # future_points = st.text_area("Behold the Future", height=15)
+    future_points = 30
+    forecast = results.forecast(steps=int(future_points))
+    forecast_index = pd.date_range(start=df.index[-1], periods=int(future_points)+1, freq='M')[1:]
+
+    plt.figure(figsize=(12, 8))
+
+    # Plot original data in blue
+    plt.plot(df.index, df['Value'], label='Original Data', color='blue')
+
+    # Plot forecasted data in red
+    plt.plot(forecast_index, forecast, label='Forecasted Data', color='red')
+
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.title('Original Time Series Data and Forecast')
+    plt.legend()
+
+    plt.savefig(buffer, format='png')  # Save the plot as PNG in memory
+    buffer.seek(0)  # Move the buffer cursor to the beginning
+
+    plot_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    img2 = base64_to_image(plot_base64)
+    st.image(img2)
+
+if 'clicked' not in st.session_state:
+    st.session_state.clicked = {1:False}
+
+def clicked(button):
+    st.session_state.clicked[button] = True
 
 def base64_to_image(base64_string):
     # Decode the base64 string
@@ -17,11 +59,6 @@ def base64_to_image(base64_string):
     # Use BytesIO to convert the byte data to image
     return Image.open(BytesIO(byte_data))
 
-if 'clicked' not in st.session_state:
-    st.session_state.clicked = {1:False}
-
-def clicked(button):
-    st.session_state.clicked[button] = True
 
 lida = Manager(text_gen = llm("openai"))
 textgen_config = TextGenerationConfig(n=1, temperature=0.5, model="gpt-3.5-turbo-0301", use_cache=True)
@@ -53,12 +90,19 @@ if menu == "Summarize":
         
 elif menu == "Question based Graph":
     st.subheader("Query your Data to Generate Graph")
-    file_uploader = st.file_uploader("Upload your CSV", type="csv")
+    file_uploader = st.file_uploader("Upload your CSV", type="json")
     if file_uploader is not None:
-        path_to_save = "filename1.csv"
+        print(file_uploader.file_id)
+        path_to_save = "filename1.json"
         with open(path_to_save, "wb") as f:
             f.write(file_uploader.getvalue())
         text_area = st.text_area("Query your Data to Generate Graph", height=200)
+        with open(path_to_save, 'r') as file:
+            data = json.load(file)
+
+        df = pd.DataFrame.from_dict(data, orient='index', columns=['Value'])
+        df.index = pd.to_datetime(df.index, unit='ms') 
+        df.to_csv(f"{path_to_save[:-5]}.csv")
         if st.button("Generate Graph"):
             if len(text_area) > 0:
                 st.info("Your Query: " + text_area)
@@ -72,8 +116,40 @@ elif menu == "Question based Graph":
                 img = base64_to_image(image_base64)
                 st.image(img)
 
-                st.button("Give Forecast", on_click=clicked, args=[1])
+                model = ARIMA(df['Value'], order=(1, 2, 3))
+                results = model.fit()
 
-                if st.session_state.clicked[1]:
-                    st.header("Start with uploading a file or just start Questions")
-            
+
+                # future_points = st.text_area("Behold the Future", height=15)
+                age = st.slider('How many Future Points to forecast?', 0, 130, 25)
+                st.write("Providing forecast for next ", age, 'datapoints')
+
+                # if st.button("Forecast", on_click=forecast):
+                #     st.write("Generating forecast")
+                # st.button("Forecast", on_click=clicked, args=[1])
+                # if st.session_state.clicked[1]:
+                #     if len(text_area) > 0:
+
+                forecast = results.forecast(steps=int(age))
+                forecast_index = pd.date_range(start=df.index[-1], periods=int(age)+1, freq='M')[1:]
+
+                plt.figure(figsize=(12, 8))
+
+                # Plot original data in blue
+                plt.plot(df.index, df['Value'], label='Original Data', color='blue')
+
+                # Plot forecasted data in red
+                plt.plot(forecast_index, forecast, label='Forecasted Data', color='red')
+
+                plt.xlabel('Date')
+                plt.ylabel('Value')
+                plt.title('Original Time Series Data and Forecast')
+                plt.legend()
+
+                plt.savefig(buffer, format='png')  # Save the plot as PNG in memory
+                buffer.seek(0)  # Move the buffer cursor to the beginning
+
+                plot_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                img2 = base64_to_image(plot_base64)
+                st.image(img2)
+        
